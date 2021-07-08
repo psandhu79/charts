@@ -1773,6 +1773,11 @@ storegateway:
     ## Max number of pods that can be unavailable after the eviction
     ##
     # maxUnavailable: 1
+   
+  # Setting hashPartioning will create multiple store deployments based on the number of shards specified using the hashmod of the blocks
+  # See https://thanos.io/sharding.md/#relabelling
+  hashPartioning: {}
+    # shards:
 
 ## Thanos Ruler parameters
 ##

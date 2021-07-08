@@ -483,6 +483,7 @@ The following tables lists the configurable parameters of the Thanos chart and t
 | `storegateway.pdb.create`                            | Enable/disable a Pod Disruption Budget creation                                                                                                               | `false`                        |
 | `storegateway.pdb.minAvailable`                      | Minimum number/percentage of pods that should remain scheduled                                                                                                | `1`                            |
 | `storegateway.pdb.maxUnavailable`                    | Maximum number/percentage of pods that may be made unavailable                                                                                                | `nil`                          |
+| `storegateway.hashPartioning.shards`                 | The number of shared used to partition the blocks based on the hashmod of the blocks                                                                   | `nil` |
 
 ### Thanos Ruler parameters
 
