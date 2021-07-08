@@ -1,11 +1,15 @@
 {{- if .Values.storegateway.enabled }}
 
-{{- $shards := int 1 }}
+{{- $shards := int 0 }}
 {{- $hashPartioning := false }}
+{{- $timePartioning := false }}
 
 {{- if .Values.storegateway.hashPartioning }}
   {{- $shards = int .Values.storegateway.hashPartioning.shards }}
   {{- $hashPartioning = true }}
+{{- else }}
+  {{- $shards = len .Values.storegateway.timePartioning }}
+  {{- $timePartioning = true }}
 {{- end }}
 
 {{- range $index, $_ := until $shards }}
@@ -15,7 +19,7 @@ metadata:
   name: {{ include "common.names.fullname" $ }}-storegateway-{{ $index }}
   labels: {{- include "common.labels.standard" $ | nindent 4 }}
     app.kubernetes.io/component: storegateway
-    {{- if .Values.commonLabels }}
+    {{- if $.Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
@@ -30,15 +34,16 @@ spec:
   selector:
     matchLabels: {{- include "common.labels.matchLabels" $ | nindent 6 }}
       app.kubernetes.io/component: storegateway
+      shard: {{ $index | quote }}
   template:
     metadata:
       labels: {{- include "common.labels.standard" $ | nindent 8 }}
         app.kubernetes.io/component: storegateway
         shard: {{ $index | quote }}
-        {{- if .Values.commonLabels }}
+        {{- if $.Values.commonLabels }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
         {{- end }}
-        {{- if .Values.storegateway.podLabels }}
+        {{- if $.Values.storegateway.podLabels }}
         {{- include "common.tplvalues.render" (dict "value" .Values.storegateway.podLabels "context" $) | nindent 8 }}
         {{- end }}
       annotations:
@@ -141,6 +146,15 @@ spec:
                   source_labels: ["shard"]
                   regex: {{ $index }}
           {{- end }}
+          {{- if $timePartioning }}
+          {{- $partion := (slice $.Values.storegateway.timePartioning  $index) | first }}
+          {{- if $partion.max }}
+          - "--max-time={{ $partion.max }}"
+          {{- end}}
+          {{- if $partion.min }}
+          - "--min-time={{ $partion.min }}"
+          {{- end}}
+          {{- end }}
           {{- if $.Values.storegateway.extraEnv }}
           env:
             {{- toYaml $.Values.storegateway.extraEnv | nindent 12 }}
@@ -152,7 +166,7 @@ spec:
             - name: grpc
               containerPort: 10901
               protocol: TCP
-          {{- if .Values.storegateway.livenessProbe.enabled }}
+          {{- if $.Values.storegateway.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
               path: /-/healthy
@@ -163,7 +177,7 @@ spec:
             successThreshold: {{ $.Values.storegateway.livenessProbe.successThreshold }}
             failureThreshold: {{ $.Values.storegateway.livenessProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.storegateway.readinessProbe.enabled }}
+          {{- if $.Values.storegateway.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
               path: /-/ready
@@ -227,7 +241,7 @@ spec:
   {{- else if and $.Values.storegateway.persistence.enabled (not $.Values.storegateway.persistence.existingClaim) }}
   volumeClaimTemplates:
     - metadata:
-        name: data-{{ $index }}
+        name: data
       spec:
         accessModes:
         {{- range $.Values.storegateway.persistence.accessModes }}
