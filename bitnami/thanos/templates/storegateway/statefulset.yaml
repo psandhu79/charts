@@ -15,6 +15,9 @@ metadata:
   name: {{ include "common.names.fullname" $ }}-storegateway-{{ $index }}
   labels: {{- include "common.labels.standard" $ | nindent 4 }}
     app.kubernetes.io/component: storegateway
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   replicas: {{ $.Values.storegateway.replicaCount }}
   podManagementPolicy: {{ $.Values.storegateway.podManagementPolicy }}
@@ -32,8 +35,11 @@ spec:
       labels: {{- include "common.labels.standard" $ | nindent 8 }}
         app.kubernetes.io/component: storegateway
         shard: {{ $index | quote }}
-        {{- if and $.Values.storegateway.enabled $.Values.storegateway.podLabels }}
-        {{- include "common.tplvalues.render" (dict "value" $.Values.storegateway.podLabels "context" $) | nindent 8 }}
+        {{- if .Values.commonLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.storegateway.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.storegateway.podLabels "context" $) | nindent 8 }}
         {{- end }}
       annotations:
         checksum/ojbstore-configuration: {{ include (print $.Template.BasePath "/objstore-secret.yaml") $ | sha256sum }}
@@ -146,8 +152,8 @@ spec:
             - name: grpc
               containerPort: 10901
               protocol: TCP
-          {{- if $.Values.storegateway.livenessProbe.enabled }}
-          livenessProbe: 
+          {{- if .Values.storegateway.livenessProbe.enabled }}
+          livenessProbe:
             httpGet:
               path: /-/healthy
               port: http
@@ -157,8 +163,8 @@ spec:
             successThreshold: {{ $.Values.storegateway.livenessProbe.successThreshold }}
             failureThreshold: {{ $.Values.storegateway.livenessProbe.failureThreshold }}
           {{- end }}
-          {{- if $.Values.storegateway.readinessProbe.enabled }}
-          readinessProbe: 
+          {{- if .Values.storegateway.readinessProbe.enabled }}
+          readinessProbe:
             httpGet:
               path: /-/ready
               port: http
