@@ -1780,8 +1780,8 @@ storegateway:
 
   ## Setting hashPartioning will create multiple store deployments based on the number of shards specified using the hashmod of the blocks
   ## See https://thanos.io/tip/thanos/sharding.md/#relabelling
-  hashPartioning: {}
-  # shards:
+  hashPartioning: 
+    shards: ""
   ## Setting time timePartioning will create multipale store deployments based on the number of partions
   ## See https://thanos.io/tip/components/store.md/#time-based-partitioning
   timePartioning:

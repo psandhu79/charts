@@ -484,7 +484,7 @@ The following tables lists the configurable parameters of the Thanos chart and t
 | `storegateway.pdb.create`                            | Enable/disable a Pod Disruption Budget creation                                                                                                               | `false`                        |
 | `storegateway.pdb.minAvailable`                      | Minimum number/percentage of pods that should remain scheduled                                                                                                | `1`                            |
 | `storegateway.pdb.maxUnavailable`                    | Maximum number/percentage of pods that may be made unavailable                                                                                                | `nil`                          |
-| `storegateway.hashPartioning.shards`                 | The number of shared used to partition the blocks based on the hashmod of the blocks                                                                   | `nil` |
+| `storegateway.hashPartioning.shards`                 | The number of shared used to partition the blocks based on the hashmod of the blocks. Can not be used with time partitioning                                                                   | `""` |
 | `storegateway.timePartioning`   |  list of min/max time for store partitions. See more details below. Setting this will create mutlipale thanos store deployments based on the number of items in the list  | [{min: "", max: ""}] |
 
 ### Store time partions
@@ -862,7 +862,7 @@ Find more information about how to deal with common errors related to Bitnami’
 
 ## Upgrading
 
-### To 5.2.0
+### To 6.0.0
 
 This version introduces hash and time partioning for the store gateway.
 

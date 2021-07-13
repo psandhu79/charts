@@ -4,7 +4,7 @@
 {{- $hashPartioning := false }}
 {{- $timePartioning := false }}
 
-{{- if .Values.storegateway.hashPartioning }}
+{{- if .Values.storegateway.hashPartioning.shards }}
   {{- $shards = int .Values.storegateway.hashPartioning.shards }}
   {{- $hashPartioning = true }}
 {{- else }}
@@ -149,10 +149,10 @@ spec:
           {{- if $timePartioning }}
           {{- $partion := (slice $.Values.storegateway.timePartioning  $index) | first }}
           {{- if $partion.max }}
-          - "--max-time={{ $partion.max }}"
+            - --max-time={{ $partion.max }}
           {{- end}}
           {{- if $partion.min }}
-          - "--min-time={{ $partion.min }}"
+            - --min-time={{ $partion.min }}
           {{- end}}
           {{- end }}
           {{- if $.Values.storegateway.extraEnv }}
