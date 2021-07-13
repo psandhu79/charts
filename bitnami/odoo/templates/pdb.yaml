@@ -1,8 +1,9 @@
-{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim ) -}}
-kind: PersistentVolumeClaim
-apiVersion: v1
+{{- if .Values.pdb.create }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
 metadata:
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
@@ -11,10 +12,12 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  accessModes:
-    - {{ .Values.persistence.accessMode | quote }}
-  resources:
-    requests:
-      storage: {{ .Values.persistence.size | quote }}
-  {{ include "dokuwiki.storageClass" . }}
-{{- end -}}
+  {{- if .Values.pdb.minAvailable }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels: {{ include "common.labels.matchLabels" . | nindent 6 }}
+{{- end }}
